@@ -1,0 +1,99 @@
+<head>
+    <script src='https://cdn.plot.ly/plotly-2.35.2.min.js'></script>
+</head>
+
+<body>
+    <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+</body>
+
+<script>
+    // Generate data for 31 days (showing one month for better visibility)
+    const days = Array.from({ length: 31 }, (_, i) => `Day ${i + 1}`);
+    
+    // Generate random data for Trans_In and Trans_Out
+    const generateDailyData = () => {
+        const data = [];
+        let currentWIP = 300; // Initial WIP value
+        
+        days.forEach((day) => {
+            const trans_in = Math.floor(Math.random() * 50); // Random Trans_In between 0 and 50
+            const trans_out = Math.floor(Math.random() * 40); // Random Trans_Out between 0 and 40
+            
+            // Calculate new WIP
+            const newWIP = currentWIP + trans_in - trans_out;
+            
+            // Add daily transactions
+            data.push(
+                {
+                    name: day,
+                    type: 'WIP',
+                    value: currentWIP
+                },
+                {
+                    name: day,
+                    type: 'Trans_In',
+                    value: trans_in
+                },
+                {
+                    name: day,
+                    type: 'Trans_Out',
+                    value: -trans_out
+                }
+            );
+            
+            currentWIP = newWIP;
+        });
+        
+        return data;
+    };
+
+    const dailyData = generateDailyData();
+
+    // Prepare data for the waterfall chart
+    const data = [{
+        type: "waterfall",
+        x: dailyData.map(d => `${d.name} ${d.type}`),
+        y: dailyData.map(d => d.value),
+        text: dailyData.map(d => d.value >= 0 ? `+${d.value}` : `${d.value}`),
+        textposition: "inside",
+        textfont: {
+            size: 10,
+            color: 'white'
+        },
+        connector: {
+            line: {
+                color: "rgb(63, 63, 63)"
+            }
+        },
+        decreasing: {
+            marker: { color: "Maroon" }
+        },
+        increasing: {
+            marker: { color: "Teal" }
+        },
+        totals: {
+            marker: { color: "DeepSkyBlue" }
+        }
+    }];
+
+    // Layout configuration
+    const layout = {
+        title: {
+            text: "Daily WIP, Trans_In, and Trans_Out Analysis"
+        },
+        showlegend: false,
+        xaxis: {
+            title: { text: "Days and Transaction Types" },
+            tickangle: -45,
+            tickfont: { size: 10 }
+        },
+        yaxis: {
+            title: { text: "Values" }
+        },
+        waterfallgap: 0.1,
+        height: 600
+    };
+
+    // Render the chart
+    Plotly.newPlot('myDiv', data, layout);
+</script>
